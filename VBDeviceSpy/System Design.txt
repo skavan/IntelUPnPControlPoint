@@ -1,0 +1,14 @@
+﻿UPnPDeviceManager
+
+1. Available Devices
+	- Scan Network
+	- Force Add
+2. Managed Devices
+	- Force Add
+	- Device
+
+Player(Device)
+
+1. AVTransport
+2. Content Directory
+3. Current Track

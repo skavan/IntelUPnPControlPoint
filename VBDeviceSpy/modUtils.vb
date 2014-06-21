@@ -3,7 +3,7 @@
 Module modUtils
     Public Function DeviceTree(device As UPnPDevice) As String
         Dim tree As String
-        tree = device.FriendlyName & vbCrLf
+        tree = device.FriendlyName & "|" & device.LocationURL & vbCrLf
         tree += ScanDevice(device, 0)
         Return tree
     End Function
