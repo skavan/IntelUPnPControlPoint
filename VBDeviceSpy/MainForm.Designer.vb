@@ -22,19 +22,23 @@ Partial Class MainForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.Strip1 = New System.Windows.Forms.StatusStrip()
         Me.lblstatus = New System.Windows.Forms.ToolStripStatusLabel()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
         Me.tabDevice = New System.Windows.Forms.TabPage()
         Me.SplitContainer2 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer1 = New System.Windows.Forms.SplitContainer()
+        Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.btnScan = New System.Windows.Forms.Button()
+        Me.cmbFilter = New System.Windows.Forms.ComboBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.lstDevices = New System.Windows.Forms.ListBox()
-        Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.cmbFilter = New System.Windows.Forms.ComboBox()
-        Me.btnScan = New System.Windows.Forms.Button()
+        Me.cMenu1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.mAddToManagedDeviceList = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mShowDescriptionXML = New System.Windows.Forms.ToolStripMenuItem()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
-        Me.lstSelectedDevices = New System.Windows.Forms.ListBox()
+        Me.lstManagedDevices = New System.Windows.Forms.ListBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.txtDetail = New System.Windows.Forms.TextBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
@@ -51,8 +55,9 @@ Partial Class MainForm
         Me.SplitContainer1.Panel1.SuspendLayout()
         Me.SplitContainer1.Panel2.SuspendLayout()
         Me.SplitContainer1.SuspendLayout()
-        Me.GroupBox1.SuspendLayout()
         Me.Panel1.SuspendLayout()
+        Me.GroupBox1.SuspendLayout()
+        Me.cMenu1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.Panel2.SuspendLayout()
@@ -62,26 +67,26 @@ Partial Class MainForm
         'Strip1
         '
         Me.Strip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.lblstatus})
-        Me.Strip1.Location = New System.Drawing.Point(0, 909)
+        Me.Strip1.Location = New System.Drawing.Point(0, 917)
         Me.Strip1.Name = "Strip1"
-        Me.Strip1.Size = New System.Drawing.Size(1232, 30)
+        Me.Strip1.Size = New System.Drawing.Size(1232, 22)
         Me.Strip1.TabIndex = 1
         Me.Strip1.Text = "StatusStrip1"
         '
         'lblstatus
         '
         Me.lblstatus.Name = "lblstatus"
-        Me.lblstatus.Size = New System.Drawing.Size(1217, 25)
+        Me.lblstatus.Size = New System.Drawing.Size(1217, 17)
         Me.lblstatus.Spring = True
         Me.lblstatus.Text = "Status"
         Me.lblstatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'TabPage2
         '
-        Me.TabPage2.Location = New System.Drawing.Point(4, 37)
+        Me.TabPage2.Location = New System.Drawing.Point(4, 26)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(1224, 868)
+        Me.TabPage2.Size = New System.Drawing.Size(1224, 887)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "TabPage2"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -89,10 +94,10 @@ Partial Class MainForm
         'tabDevice
         '
         Me.tabDevice.Controls.Add(Me.SplitContainer2)
-        Me.tabDevice.Location = New System.Drawing.Point(4, 37)
+        Me.tabDevice.Location = New System.Drawing.Point(4, 26)
         Me.tabDevice.Name = "tabDevice"
         Me.tabDevice.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabDevice.Size = New System.Drawing.Size(1224, 868)
+        Me.tabDevice.Size = New System.Drawing.Size(1224, 887)
         Me.tabDevice.TabIndex = 0
         Me.tabDevice.Text = "UPnP Devices"
         Me.tabDevice.UseVisualStyleBackColor = True
@@ -111,7 +116,7 @@ Partial Class MainForm
         '
         Me.SplitContainer2.Panel2.Controls.Add(Me.GroupBox3)
         Me.SplitContainer2.Panel2.Controls.Add(Me.Panel2)
-        Me.SplitContainer2.Size = New System.Drawing.Size(1218, 862)
+        Me.SplitContainer2.Size = New System.Drawing.Size(1218, 881)
         Me.SplitContainer2.SplitterDistance = 438
         Me.SplitContainer2.TabIndex = 0
         '
@@ -130,33 +135,9 @@ Partial Class MainForm
         'SplitContainer1.Panel2
         '
         Me.SplitContainer1.Panel2.Controls.Add(Me.GroupBox2)
-        Me.SplitContainer1.Size = New System.Drawing.Size(438, 862)
-        Me.SplitContainer1.SplitterDistance = 657
+        Me.SplitContainer1.Size = New System.Drawing.Size(438, 881)
+        Me.SplitContainer1.SplitterDistance = 671
         Me.SplitContainer1.TabIndex = 0
-        '
-        'GroupBox1
-        '
-        Me.GroupBox1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.GroupBox1.Controls.Add(Me.lstDevices)
-        Me.GroupBox1.Location = New System.Drawing.Point(0, 52)
-        Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Padding = New System.Windows.Forms.Padding(6)
-        Me.GroupBox1.Size = New System.Drawing.Size(438, 605)
-        Me.GroupBox1.TabIndex = 7
-        Me.GroupBox1.TabStop = False
-        Me.GroupBox1.Text = "Available UPnP Devices:"
-        '
-        'lstDevices
-        '
-        Me.lstDevices.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.lstDevices.FormattingEnabled = True
-        Me.lstDevices.ItemHeight = 28
-        Me.lstDevices.Location = New System.Drawing.Point(6, 33)
-        Me.lstDevices.Name = "lstDevices"
-        Me.lstDevices.Size = New System.Drawing.Size(426, 566)
-        Me.lstDevices.TabIndex = 2
         '
         'Panel1
         '
@@ -166,15 +147,6 @@ Partial Class MainForm
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(438, 52)
         Me.Panel1.TabIndex = 6
-        '
-        'cmbFilter
-        '
-        Me.cmbFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.cmbFilter.FormattingEnabled = True
-        Me.cmbFilter.Location = New System.Drawing.Point(6, 8)
-        Me.cmbFilter.Name = "cmbFilter"
-        Me.cmbFilter.Size = New System.Drawing.Size(300, 36)
-        Me.cmbFilter.TabIndex = 1
         '
         'btnScan
         '
@@ -187,27 +159,80 @@ Partial Class MainForm
         Me.btnScan.Text = "Scan"
         Me.btnScan.UseVisualStyleBackColor = True
         '
+        'cmbFilter
+        '
+        Me.cmbFilter.Anchor = CType((System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.cmbFilter.FormattingEnabled = True
+        Me.cmbFilter.Location = New System.Drawing.Point(6, 8)
+        Me.cmbFilter.Name = "cmbFilter"
+        Me.cmbFilter.Size = New System.Drawing.Size(300, 25)
+        Me.cmbFilter.TabIndex = 1
+        '
+        'GroupBox1
+        '
+        Me.GroupBox1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GroupBox1.Controls.Add(Me.lstDevices)
+        Me.GroupBox1.Location = New System.Drawing.Point(0, 52)
+        Me.GroupBox1.Name = "GroupBox1"
+        Me.GroupBox1.Padding = New System.Windows.Forms.Padding(6)
+        Me.GroupBox1.Size = New System.Drawing.Size(438, 619)
+        Me.GroupBox1.TabIndex = 7
+        Me.GroupBox1.TabStop = False
+        Me.GroupBox1.Text = "Available UPnP Devices:"
+        '
+        'lstDevices
+        '
+        Me.lstDevices.ContextMenuStrip = Me.cMenu1
+        Me.lstDevices.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstDevices.FormattingEnabled = True
+        Me.lstDevices.ItemHeight = 17
+        Me.lstDevices.Location = New System.Drawing.Point(6, 24)
+        Me.lstDevices.Name = "lstDevices"
+        Me.lstDevices.Size = New System.Drawing.Size(426, 589)
+        Me.lstDevices.TabIndex = 2
+        '
+        'cMenu1
+        '
+        Me.cMenu1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mAddToManagedDeviceList, Me.mShowDescriptionXML})
+        Me.cMenu1.Name = "cMenu1"
+        Me.cMenu1.ShowImageMargin = False
+        Me.cMenu1.Size = New System.Drawing.Size(198, 48)
+        '
+        'mAddToManagedDeviceList
+        '
+        Me.mAddToManagedDeviceList.Name = "mAddToManagedDeviceList"
+        Me.mAddToManagedDeviceList.Size = New System.Drawing.Size(197, 22)
+        Me.mAddToManagedDeviceList.Text = "Add to Managed Device List"
+        '
+        'mShowDescriptionXML
+        '
+        Me.mShowDescriptionXML.Name = "mShowDescriptionXML"
+        Me.mShowDescriptionXML.Size = New System.Drawing.Size(197, 22)
+        Me.mShowDescriptionXML.Text = "Show Description XML"
+        '
         'GroupBox2
         '
-        Me.GroupBox2.Controls.Add(Me.lstSelectedDevices)
+        Me.GroupBox2.Controls.Add(Me.lstManagedDevices)
         Me.GroupBox2.Dock = System.Windows.Forms.DockStyle.Fill
         Me.GroupBox2.Location = New System.Drawing.Point(0, 0)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Padding = New System.Windows.Forms.Padding(6)
-        Me.GroupBox2.Size = New System.Drawing.Size(438, 201)
+        Me.GroupBox2.Size = New System.Drawing.Size(438, 206)
         Me.GroupBox2.TabIndex = 5
         Me.GroupBox2.TabStop = False
-        Me.GroupBox2.Text = "Selected UPnP Devices:"
+        Me.GroupBox2.Text = "Managed UPnP Devices:"
         '
-        'lstSelectedDevices
+        'lstManagedDevices
         '
-        Me.lstSelectedDevices.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.lstSelectedDevices.FormattingEnabled = True
-        Me.lstSelectedDevices.ItemHeight = 28
-        Me.lstSelectedDevices.Location = New System.Drawing.Point(6, 33)
-        Me.lstSelectedDevices.Name = "lstSelectedDevices"
-        Me.lstSelectedDevices.Size = New System.Drawing.Size(426, 162)
-        Me.lstSelectedDevices.TabIndex = 2
+        Me.lstManagedDevices.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstManagedDevices.FormattingEnabled = True
+        Me.lstManagedDevices.ItemHeight = 17
+        Me.lstManagedDevices.Location = New System.Drawing.Point(6, 24)
+        Me.lstManagedDevices.Name = "lstManagedDevices"
+        Me.lstManagedDevices.Size = New System.Drawing.Size(426, 176)
+        Me.lstManagedDevices.TabIndex = 2
         '
         'GroupBox3
         '
@@ -215,7 +240,7 @@ Partial Class MainForm
         Me.GroupBox3.Dock = System.Windows.Forms.DockStyle.Fill
         Me.GroupBox3.Location = New System.Drawing.Point(0, 52)
         Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(776, 810)
+        Me.GroupBox3.Size = New System.Drawing.Size(776, 829)
         Me.GroupBox3.TabIndex = 8
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Query Results:"
@@ -223,11 +248,11 @@ Partial Class MainForm
         'txtDetail
         '
         Me.txtDetail.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.txtDetail.Location = New System.Drawing.Point(3, 30)
+        Me.txtDetail.Location = New System.Drawing.Point(3, 21)
         Me.txtDetail.Multiline = True
         Me.txtDetail.Name = "txtDetail"
         Me.txtDetail.ReadOnly = True
-        Me.txtDetail.Size = New System.Drawing.Size(770, 777)
+        Me.txtDetail.Size = New System.Drawing.Size(770, 805)
         Me.txtDetail.TabIndex = 1
         '
         'Panel2
@@ -248,7 +273,7 @@ Partial Class MainForm
         Me.ComboBox2.FormattingEnabled = True
         Me.ComboBox2.Location = New System.Drawing.Point(6, 8)
         Me.ComboBox2.Name = "ComboBox2"
-        Me.ComboBox2.Size = New System.Drawing.Size(638, 36)
+        Me.ComboBox2.Size = New System.Drawing.Size(638, 25)
         Me.ComboBox2.TabIndex = 1
         '
         'Button2
@@ -270,12 +295,12 @@ Partial Class MainForm
         Me.tbControl.Location = New System.Drawing.Point(0, 0)
         Me.tbControl.Name = "tbControl"
         Me.tbControl.SelectedIndex = 0
-        Me.tbControl.Size = New System.Drawing.Size(1232, 909)
+        Me.tbControl.Size = New System.Drawing.Size(1232, 917)
         Me.tbControl.TabIndex = 2
         '
         'MainForm
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(11.0!, 28.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 17.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1232, 939)
         Me.Controls.Add(Me.tbControl)
@@ -295,8 +320,9 @@ Partial Class MainForm
         Me.SplitContainer1.Panel2.ResumeLayout(False)
         CType(Me.SplitContainer1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.SplitContainer1.ResumeLayout(False)
-        Me.GroupBox1.ResumeLayout(False)
         Me.Panel1.ResumeLayout(False)
+        Me.GroupBox1.ResumeLayout(False)
+        Me.cMenu1.ResumeLayout(False)
         Me.GroupBox2.ResumeLayout(False)
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox3.PerformLayout()
@@ -319,11 +345,14 @@ Partial Class MainForm
     Friend WithEvents cmbFilter As System.Windows.Forms.ComboBox
     Friend WithEvents btnScan As System.Windows.Forms.Button
     Friend WithEvents GroupBox2 As System.Windows.Forms.GroupBox
-    Friend WithEvents lstSelectedDevices As System.Windows.Forms.ListBox
+    Friend WithEvents lstManagedDevices As System.Windows.Forms.ListBox
     Friend WithEvents Panel2 As System.Windows.Forms.Panel
     Friend WithEvents ComboBox2 As System.Windows.Forms.ComboBox
     Friend WithEvents Button2 As System.Windows.Forms.Button
     Friend WithEvents GroupBox3 As System.Windows.Forms.GroupBox
     Friend WithEvents txtDetail As System.Windows.Forms.TextBox
+    Friend WithEvents cMenu1 As System.Windows.Forms.ContextMenuStrip
+    Friend WithEvents mAddToManagedDeviceList As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents mShowDescriptionXML As System.Windows.Forms.ToolStripMenuItem
 
 End Class

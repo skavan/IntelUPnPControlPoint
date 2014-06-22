@@ -1,9 +1,9 @@
 ﻿Imports OpenSource.UPnP
 
 Module modUtils
-    Public Function DeviceTree(device As UPnPDevice) As String
+    Public Function ParseDeviceTree(device As UPnPDevice) As String
         Dim tree As String
-        tree = device.FriendlyName & "|" & device.LocationURL & vbCrLf
+        tree = device.FriendlyName & " | " & device.LocationURL & vbCrLf
         tree += ScanDevice(device, 0)
         Return tree
     End Function
