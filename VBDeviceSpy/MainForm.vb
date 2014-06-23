@@ -71,10 +71,12 @@ Public Class MainForm
 
 #Region "Initialization & Cleanup"
 
+    '// save settings and cleanup
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
-        Dim myCol As New Collections.Specialized.StringCollection
-        myCol = My.Settings.SearchActions
-        For Each device As UPnPDevice In lstManagedDevices.Items
+
+        Dim myCol As Collections.Specialized.StringCollection = My.Settings.SearchActions
+        If myCol Is Nothing Then myCol = New Collections.Specialized.StringCollection
+        For Each device As UPnPDevice In disc.ManagedDevices
             '// Create a specific device entry
             Dim searchAction1 As New SearchAction(device.LocationURL, device.FriendlyName, SearchAction.eSearchType.deviceIP)
 
@@ -122,8 +124,10 @@ Public Class MainForm
         lstDevices.ContextMenuStrip = cMenu1
         lstManagedDevices.ContextMenuStrip = cMenu1
 
-        'lstDevices.DataSource = disc.AvailableDevices
-        'lstDevices.DisplayMember = "FriendlyName"
+        lstDevices.DataSource = disc.AvailableDevices
+        lstDevices.DisplayMember = "FriendlyName"
+        lstManagedDevices.DataSource = disc.ManagedDevices
+        lstManagedDevices.DisplayMember = "FriendlyName"
         'lstDevices.DisplayMember = "FriendlyName"
     End Sub
 #End Region
@@ -133,8 +137,10 @@ Public Class MainForm
     Private Sub UpdateDeviceList(device As UPnPDevice, eventType As UPnPDeviceManager.eDeviceDiscoveryEvent)
         Select Case eventType
             Case UPnPDeviceManager.eDeviceDiscoveryEvent.added
-                lstDevices.Items.Add(device)
-                lstDevices.DisplayMember = "FriendlyName"
+                lblstatus.Text = lstDevices.Items.Count & " Devices found."
+                'lstDevices.Items.Add(device)
+                'lstDevices.DisplayMember = "FriendlyName"
+
                 'If lstDevices.DataSource Is Nothing Then
                 '    lstDevices.DataSource = disc.AvailableDevices
                 'End If
@@ -208,12 +214,15 @@ Public Class MainForm
         Select Case menuItem1.Name
             Case "AddManagedDevice"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
-                If Not lstManagedDevices.Items.Contains(device) Then
-                    lstManagedDevices.Items.Add(device)
-                End If
+                disc.AddManagedDevice(device)
+
+                'If Not lstManagedDevices.Items.Contains(device) Then
+                '    lstManagedDevices.Items.Add(device)
+                'End If
             Case "RemoveManagedDevice"
                 Dim device As UPnPDevice = lstManagedDevices.SelectedItem
-                lstManagedDevices.Items.Remove(device)
+                disc.RemoveManagedDevice(device)
+                'lstManagedDevices.Items.Remove(device)
             Case "ShowXML"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
                 System.Diagnostics.Process.Start(device.LocationURL)
