@@ -131,7 +131,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UPnP.csproj">
+    <ProjectReference Include="..\UPnP\UPnP.csproj">
       <Project>{584ed187-8f2a-4b58-a266-85f3f212b092}</Project>
       <Name>UPnP</Name>
     </ProjectReference>
