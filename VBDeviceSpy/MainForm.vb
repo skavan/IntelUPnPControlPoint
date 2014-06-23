@@ -237,4 +237,15 @@ Public Class MainForm
 
 
 
+    Private Sub disc_ManagedDeviceEvent(device As UPnPDevice, managedDeviceEvent As UPnPDeviceManager.eManagedDeviceEvent) Handles disc.ManagedDeviceEvent
+        Select Case managedDeviceEvent
+            Case UPnPDeviceManager.eManagedDeviceEvent.addDevice
+                lblstatus.Text = device.FriendlyName & " added to Managed Device List"
+            Case UPnPDeviceManager.eManagedDeviceEvent.invalidDevice
+                lblstatus.Text = device.FriendlyName & " is not a Manageable Device"
+            Case UPnPDeviceManager.eManagedDeviceEvent.removeDevice
+                lblstatus.Text = device.FriendlyName & " removed Managed Device List"
+
+        End Select
+    End Sub
 End Class

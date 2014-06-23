@@ -2,14 +2,14 @@
 
 Module modUtils
     Public Function ParseDeviceTree(device As UPnPDevice) As String
-        Dim tree As String
+        Dim tree As String = ""
         tree = device.FriendlyName & " | " & device.LocationURL & vbCrLf
         tree += ScanDevice(device, 0)
         Return tree
     End Function
 
     Private Function ScanDevice(device As UPnPDevice, tabLevel As Integer) As String
-        Dim szTree As String
+        Dim szTree As String = ""
         For Each service As UPnPService In device.Services
             szTree += AddService(service, tabLevel)
         Next
@@ -31,7 +31,7 @@ Module modUtils
     End Function
 
     Private Function Indent(level As Integer)
-        Dim szIndent As String
+        Dim szIndent As String = ""
         For i = 0 To level
             szIndent += vbTab
         Next
