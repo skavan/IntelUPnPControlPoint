@@ -27,6 +27,8 @@ Namespace UPnPDeviceManager
         Property AvailableDevices As New BindingList(Of UPnPDevice)
         Property ManagedDevices As New BindingList(Of UPnPDevice)
 
+        Const HasAVTransport As Integer = 1
+        Const HasContentDirectory As Integer = 2
 #Region "Device Scan Handling Events"
 
         Private Sub HandleAddedDevice(sender As UPnPSmartControlPoint, device As UPnPDevice)
@@ -111,30 +113,70 @@ Namespace UPnPDeviceManager
         '// Walks the tree of devices and services to find an AVTransport. Without it, it's an invalid device!
         '// If we find AVTransport in a child, we still return the parent.
         Private Function CheckValidManagedDevice(device As UPnPDevice) As UPnPDevice
-            '// The first thing to find is the parent device of this tree
+            '// The first thing to do is see if this is a complete media device, and ocntains a ContentDirectory And a Transport
+
+            If CheckForService(device, "urn:upnp-org:serviceId:ContentDirectory") Then device.User = HasContentDirectory
+            If CheckForService(device, "urn:upnp-org:serviceId:AVTransport") Then device.User = device.User + HasAVTransport
+
+            Select Case device.User
+                Case (HasContentDirectory + HasAVTransport)
+                    '// we've found a complete device. Add it.
+                    '//add code here.
+                Case HasContentDirectory
+                    '// find matching AVTransport
+                    '// create child-parent
+                    '// parent is always contentdir
+                Case HasAVTransport
+                    '// find matching ContentDirectory
+                    '// create child-parent
+                    '// parent is always contentdir
+                Case 0
+                    '//Invalid Device
+            End Select
+        End Function
+
+        Private Function FindSiblingDevice(device As UPnPDevice, targetServiceID As String) As UPnPDevice
+            For Each targetDevice As UPnPDevice In AvailableDevices
+                If targetDevice.RemoteEndPoint.ToString = device.RemoteEndPoint.ToString Then
+                    If targetDevice.UniqueDeviceName <> device.UniqueDeviceName Then
+                        If CheckForService(targetDevice, targetServiceID) Then
+                            Return targetDevice
+                            Exit For
+                        End If
+
+                    End If
+                End If
+            Next
+            Return Nothing
+        End Function
+
+        Private Function CheckForService(device As UPnPDevice, serviceID As String) As Boolean
             If Not device.ParentDevice Is Nothing Then
-                Return CheckValidManagedDevice(device.ParentDevice)
+                Return CheckForService(device.ParentDevice, serviceID)
             Else    '// now let's check for AVTransport somewhere in the tree
                 For Each service As UPnPService In device.Services
-                    If service.ServiceURN.Contains("AVTransport") Then
-                        Return device
+                    If service.ServiceURN = serviceID Then
+                        Return True
                     End If
                 Next
                 For Each childDevice As UPnPDevice In device.EmbeddedDevices
                     For Each service As UPnPService In childDevice.Services
-                        If service.ServiceURN.Contains("AVTransport") Then
-                            Return device
+                        If service.ServiceURN = serviceID Then
+                            Return True
                         End If
                     Next
                 Next
 
-                Return Nothing
+                Return False
             End If
-
-
-
-
         End Function
+
+        Public Sub LinkChildDevice(ParentDevice As UPnPDevice, ChildDevice As UPnPDevice)
+            ParentDevice.AddDevice(ChildDevice)
+
+        End Sub
+
+
 
 #End Region
 
