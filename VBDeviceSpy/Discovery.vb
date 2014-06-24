@@ -15,6 +15,7 @@ Namespace UPnPDeviceManager
         addDevice
         removeDevice
         invalidDevice
+        incompleteDevice
     End Enum
 
     Public Class NetworkManager
@@ -26,6 +27,11 @@ Namespace UPnPDeviceManager
         Private df As UPnPDeviceFactory
         Property AvailableDevices As New BindingList(Of UPnPDevice)
         Property ManagedDevices As New BindingList(Of UPnPDevice)
+
+        Const HAS_AVTRANSPORT As Integer = 1
+        Const HAS_CONTENTDIRECTORY As Integer = 2
+        Const AVTRANSPORT = "urn:upnp-org:serviceId:AVTransport"
+        Const CONTENTDIRECTORY = "urn:upnp-org:serviceId:ContentDirectory"
 
 #Region "Device Scan Handling Events"
 
@@ -89,19 +95,17 @@ Namespace UPnPDeviceManager
             End Try
         End Sub
 
-        Public Sub AddManagedDevice(device As UPnPDevice)
-            If Not ManagedDevices.Contains(device) Then
-                Dim _device As UPnPDevice = CheckValidManagedDevice(device)
-                If Not _device Is Nothing Then
-                    ManagedDevices.Add(_device)
-                    RaiseEvent ManagedDeviceEvent(_device, eManagedDeviceEvent.addDevice)
-                Else
-                    RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.invalidDevice)
+        '// public function to try and add a device to the manages device list
+        Public Sub AddToManagedDevices(device As UPnPDevice)
+            If Not device Is Nothing Then
+                If Not ManagedDevices.Contains(device) Then
+                    CheckValidManagedDevice(device)
                 End If
             End If
         End Sub
 
-        Public Sub RemoveManagedDevice(device As UPnPDevice)
+        '// public function to remove a device to the manages device list
+        Public Sub RemoveFromManagedDevices(device As UPnPDevice)
             If ManagedDevices.Contains(device) Then
                 ManagedDevices.Remove(device)
                 RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.removeDevice)
@@ -110,31 +114,105 @@ Namespace UPnPDeviceManager
 
         '// Walks the tree of devices and services to find an AVTransport. Without it, it's an invalid device!
         '// If we find AVTransport in a child, we still return the parent.
-        Private Function CheckValidManagedDevice(device As UPnPDevice) As UPnPDevice
-            '// The first thing to find is the parent device of this tree
+        Private Sub CheckValidManagedDevice(device As UPnPDevice)
+
+            If device Is Nothing Then
+                RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.invalidDevice)
+            End If
+
+            '// The first thing to do is see if this is a complete media device, and ocntains a ContentDirectory And a Transport
+            '// Let's use the .User field to hold the value
+            If CheckForService(device, CONTENTDIRECTORY) Then device.User = HAS_CONTENTDIRECTORY
+            If CheckForService(device, AVTRANSPORT) Then device.User = device.User + HAS_AVTRANSPORT
+
+            Select Case device.User
+                Case (HAS_CONTENTDIRECTORY + HAS_AVTRANSPORT)
+                    '// we've found a complete device. Add it.
+                    AddManagedDevice(device, ">>" & device.FriendlyName)
+                    RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.addDevice)
+                Case HAS_CONTENTDIRECTORY
+                    '// find matching AVTransport
+                    '// create child-parent
+                    '// parent is always contentdir
+                    Dim linkedDevice As UPnPDevice = FindSiblingDevice(device, AVTRANSPORT)
+                    If Not linkedDevice Is Nothing Then
+                        LinkChildDevice(device, linkedDevice)
+                        AddManagedDevice(device, String.Format("{{{0}|{1}}}", device.FriendlyName, linkedDevice.FriendlyName))
+                    Else
+                        RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.incompleteDevice)
+                    End If
+                Case HAS_AVTRANSPORT
+                    '// find matching ContentDirectory
+                    '// create child-parent
+                    '// parent is always contentdir
+                    Dim linkedDevice As UPnPDevice = FindSiblingDevice(device, CONTENTDIRECTORY)
+                    If Not linkedDevice Is Nothing Then
+                        LinkChildDevice(linkedDevice, device)
+                        AddManagedDevice(linkedDevice, String.Format("{{{0}|{1}}}", linkedDevice.FriendlyName, device.FriendlyName))
+                    Else
+                        RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.incompleteDevice)
+                    End If
+                Case Else
+                    '//Invalid Device
+                    RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.invalidDevice)
+            End Select
+        End Sub
+
+        '// add a device to the managed device collection and setup the User2 variable with a descriptive name
+        Private Sub AddManagedDevice(device As UPnPDevice, description As String)
+            device.Reserved = "XXX" & description
+
+            If Not ManagedDevices.Contains(device) Then
+                ManagedDevices.Add(device)
+                RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.addDevice)
+            End If
+        End Sub
+
+        '// given a device and a ServiceID, go find another device with the same ipaddress that has the target ServiceID in its tree.
+        Private Function FindSiblingDevice(device As UPnPDevice, targetServiceID As String) As UPnPDevice
+            For Each targetDevice As UPnPDevice In AvailableDevices
+                If targetDevice.RemoteEndPoint.ToString = device.RemoteEndPoint.ToString Then
+                    If targetDevice.UniqueDeviceName <> device.UniqueDeviceName Then
+                        If CheckForService(targetDevice, targetServiceID) Then
+                            Return targetDevice
+                            Exit For
+                        Else
+                            '// we've found ourself! skip to next.
+                        End If
+                    End If
+                End If
+            Next
+            Return Nothing
+        End Function
+
+        '// a utility routine that chacks for a serviceID within a device -- walking up and down the device tree looking at parents and children.
+        Private Function CheckForService(device As UPnPDevice, serviceID As String) As Boolean
             If Not device.ParentDevice Is Nothing Then
-                Return CheckValidManagedDevice(device.ParentDevice)
+                Return CheckForService(device.ParentDevice, serviceID)
             Else    '// now let's check for AVTransport somewhere in the tree
                 For Each service As UPnPService In device.Services
-                    If service.ServiceURN.Contains("AVTransport") Then
-                        Return device
+                    If service.ServiceID = serviceID Then
+                        Return True
                     End If
                 Next
                 For Each childDevice As UPnPDevice In device.EmbeddedDevices
                     For Each service As UPnPService In childDevice.Services
-                        If service.ServiceURN.Contains("AVTransport") Then
-                            Return device
+                        If service.ServiceID = serviceID Then
+                            Return True
                         End If
                     Next
                 Next
 
-                Return Nothing
+                Return False
             End If
-
-
-
-
         End Function
+
+        '// add a device as a child to its parent
+        Public Sub LinkChildDevice(ParentDevice As UPnPDevice, ChildDevice As UPnPDevice)
+            ParentDevice.AddDevice(ChildDevice)
+        End Sub
+
+
 
 #End Region
 
