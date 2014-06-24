@@ -1,34 +1,9 @@
 ﻿Imports OpenSource.UPnP
 
-
-
 Public Class MainForm
     Dim WithEvents disc As New UPnPDeviceManager.NetworkManager
     Delegate Sub delUpdateDeviceList(device As UPnPDevice, eventType As UPnPDeviceManager.eDeviceDiscoveryEvent)
 
-    '// A Small Class to hold a Search Spec Record
-    Class SearchAction
-
-        Enum eSearchType
-            devicePattern
-            deviceIP
-        End Enum
-
-        Property FriendlyName As String
-        Property Filter As String
-        Property SearchType As eSearchType
-
-        Sub New(sSpec As String, sFriendlyName As String, iSearchType As eSearchType)
-            _Filter = sSpec
-            _FriendlyName = sFriendlyName
-            _SearchType = iSearchType
-        End Sub
-
-        Public Function GetString(delimiter As String) As String
-            Return Me.Filter & delimiter & Me.FriendlyName & delimiter & Me.SearchType
-        End Function
-
-    End Class
 
 #Region "GUI Triggered Events & Methods"
 
@@ -51,8 +26,11 @@ Public Class MainForm
 
     '// A list device was clicked. Go get its service/device tree
     Private Sub lstDevices_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstDevices.SelectedIndexChanged
-        If lstDevices.SelectedIndex <> -1 Then
-            txtDetail.Text = ParseDeviceTree(lstDevices.SelectedItem)
+        If lstDevices.SelectedIndex > -1 Then
+            If lstDevices.Items.Count > 0 Then
+                txtDetail.Text = ParseDeviceTree(lstDevices.SelectedItem)
+            End If
+
         End If
     End Sub
 
@@ -74,23 +52,34 @@ Public Class MainForm
     '// save settings and cleanup
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
 
-        Dim myCol As Collections.Specialized.StringCollection = My.Settings.SearchActions
-        If myCol Is Nothing Then myCol = New Collections.Specialized.StringCollection
+        Dim myCol As SearchActions = My.Settings.SearchActions
+        If myCol Is Nothing Then myCol = New SearchActions
+        Dim mySavedDevices As SavedDevices = My.Settings.SavedDevices
+        If mySavedDevices Is Nothing Then mySavedDevices = New SavedDevices
+
+
         For Each device As UPnPDevice In disc.ManagedDevices
             '// Create a specific device entry
             Dim searchAction1 As New SearchAction(device.LocationURL, device.FriendlyName, SearchAction.eSearchType.deviceIP)
+            If Not myCol.Contains(searchAction1) Then myCol.Add(searchAction1)
 
-            If Not myCol.Contains(searchAction1.GetString("|")) Then              '// ignore dupes
-                'myCol.Add()
-                myCol.Add(searchAction1.GetString("|"))
-            End If
+
             '// Create a general upnp urn entry
             Dim searchAction2 As New SearchAction(device.DeviceURN, "*DEVICE TYPE: " & device.StandardDeviceType, SearchAction.eSearchType.devicePattern)
-            If Not myCol.Contains(searchAction2.GetString("|")) Then              '// ignore dupes
-                myCol.Add(searchAction2.GetString("|"))
-            End If
-        Next
+            If Not myCol.Contains(searchAction2) Then myCol.Add(searchAction2)
 
+            '// Create a saved device
+            Dim savedDevice As SavedDevice
+            If device.IsLinkedDevice Then
+                savedDevice = New SavedDevice(device.ManagedDeviceName, device.UniqueDeviceName, True, device.LinkedDeviceName)
+            Else
+                savedDevice = New SavedDevice(device.ManagedDeviceName, device.UniqueDeviceName, False, "")
+            End If
+            mySavedDevices.Add(savedDevice)
+
+
+        Next
+        My.Settings.SavedDevices = mySavedDevices
         My.Settings.SearchActions = myCol
         My.Settings.Save()
         My.Settings.Reload()
@@ -107,15 +96,16 @@ Public Class MainForm
         cmbFilter.Items.Clear()
         cmbFilter.DisplayMember = "FriendlyName"
         cmbFilter.Items.Add(New SearchAction("", " All UPnP Devices", SearchAction.eSearchType.devicePattern))
-        'cmbFilter.Items.Add(New SearchAction("urn:schemas-upnp-org:device:MediaRenderer:1", "Media Renderers", SearchAction.eSearchType.devicePattern))
-        My.Settings.Test = "Hello"
-        If Not My.Settings.SearchActions Is Nothing Then
-            For Each strAction As String In My.Settings.SearchActions
-                Dim searchAction As New SearchAction(strAction.Split("|")(0), strAction.Split("|")(1), strAction.Split("|")(2))
+
+
+        Dim searchActions As SearchActions = My.Settings.SearchActions
+
+        If Not searchActions Is Nothing Then
+            For Each searchAction In My.Settings.SearchActions
                 If Not cmbFilter.Items.Contains(searchAction) Then cmbFilter.Items.Add(searchAction)
             Next
         End If
-        
+
         'cmbFilter.Items.Add(New SearchAction("http://192.168.1.126:9000/plugins/UPnP/MediaRenderer.xml?player=00:04:20:16:8d:51", "SqueezeBox @ 192.168.1.126", SearchAction.eSearchType.deviceIP))
         'cmbFilter.Items.Add(New SearchAction("http://192.168.1.167:1400/xml/device_description.xml", "SONOS @ 192.168.1.167", SearchAction.eSearchType.deviceIP))
 
@@ -123,12 +113,6 @@ Public Class MainForm
         cmbFilter.SelectedIndex = 0
         lstDevices.ContextMenuStrip = cMenu1
         lstManagedDevices.ContextMenuStrip = cMenu1
-
-        lstDevices.DataSource = disc.AvailableDevices
-        lstDevices.DisplayMember = "ManufacturerURL"
-        lstManagedDevices.DataSource = disc.ManagedDevices
-        lstManagedDevices.DisplayMember = "User"
-        'lstDevices.DisplayMember = "FriendlyName"
 
     End Sub
 #End Region
@@ -139,6 +123,11 @@ Public Class MainForm
         Select Case eventType
             Case UPnPDeviceManager.eDeviceDiscoveryEvent.added
                 lblstatus.Text = lstDevices.Items.Count & " Devices found."
+                If lstDevices.DataSource Is Nothing Then
+                    lstDevices.DataSource = disc.AvailableDevices
+                    'lstDevices.DisplayMember = "FriendlyName"
+                End If
+
                 'lstDevices.Items.Add(device)
                 'lstDevices.DisplayMember = "FriendlyName"
 
@@ -159,9 +148,9 @@ Public Class MainForm
     '// Launch a search based on the requirements contained within the SearchItem
     Private Sub DeviceScan(searchAction As SearchAction)
         Select Case searchAction.SearchType
-            Case MainForm.SearchAction.eSearchType.deviceIP         '// Force find a specific IP Address
+            Case VBDeviceSpy.SearchAction.eSearchType.deviceIP         '// Force find a specific IP Address
                 disc.NetworkScan(searchAction.Filter, True)
-            Case MainForm.SearchAction.eSearchType.devicePattern    '// Scan all UPnP Devices
+            Case VBDeviceSpy.SearchAction.eSearchType.devicePattern    '// Scan all UPnP Devices
                 If searchAction.Filter = "" Then
                     disc.NetworkScan()
                 Else                                                '// Scan for a matching urn
@@ -216,10 +205,11 @@ Public Class MainForm
             Case "AddManagedDevice"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
                 disc.AddToManagedDevices(device)
+                If lstManagedDevices.DataSource Is Nothing Then
+                    lstManagedDevices.DataSource = disc.ManagedDevices
+                    lstManagedDevices.DisplayMember = "ManagedDeviceName"
+                End If
 
-                'If Not lstManagedDevices.Items.Contains(device) Then
-                '    lstManagedDevices.Items.Add(device)
-                'End If
             Case "RemoveManagedDevice"
                 Dim device As UPnPDevice = lstManagedDevices.SelectedItem
                 disc.RemoveFromManagedDevices(device)
@@ -241,16 +231,15 @@ Public Class MainForm
     Private Sub disc_ManagedDeviceEvent(device As UPnPDevice, managedDeviceEvent As UPnPDeviceManager.eManagedDeviceEvent) Handles disc.ManagedDeviceEvent
         Select Case managedDeviceEvent
             Case UPnPDeviceManager.eManagedDeviceEvent.addDevice
+
                 lblstatus.Text = device.FriendlyName & " added to Managed Device List"
             Case UPnPDeviceManager.eManagedDeviceEvent.invalidDevice
                 lblstatus.Text = device.FriendlyName & " is not a Manageable Device"
             Case UPnPDeviceManager.eManagedDeviceEvent.removeDevice
                 lblstatus.Text = device.FriendlyName & " removed Managed Device List"
-
+            Case UPnPDeviceManager.eManagedDeviceEvent.incompleteDevice
+                lblstatus.Text = device.FriendlyName & " incomplete Managed Device List"
         End Select
     End Sub
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-
-    End Sub
 End Class

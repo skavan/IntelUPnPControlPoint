@@ -57,7 +57,7 @@ namespace OpenSource.UPnP
         public object User = null;
         public object User2 = null;
         public object User3 = null;
-        public string ManagedDeviceName = "";
+        
         public object Reserved = null;
 
         private string _BootID = "";
@@ -189,7 +189,9 @@ namespace OpenSource.UPnP
         public String SerialNumber;
         public String ProductCode;
         public String UniqueDeviceName;
-
+        public String ManagedDeviceName { get; set; }
+        public bool IsLinkedDevice { get; set; }
+        public String LinkedDeviceName { get; set; }
         public int Major;
         public int Minor;
         public int ExpirationTimeout;

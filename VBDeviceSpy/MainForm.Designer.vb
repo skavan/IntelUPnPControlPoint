@@ -42,7 +42,7 @@ Partial Class MainForm
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.txtDetail = New System.Windows.Forms.TextBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
-        Me.ComboBox2 = New System.Windows.Forms.ComboBox()
+        Me.cmbUtil = New System.Windows.Forms.ComboBox()
         Me.Button2 = New System.Windows.Forms.Button()
         Me.tbControl = New System.Windows.Forms.TabControl()
         Me.Strip1.SuspendLayout()
@@ -67,26 +67,26 @@ Partial Class MainForm
         'Strip1
         '
         Me.Strip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.lblstatus})
-        Me.Strip1.Location = New System.Drawing.Point(0, 909)
+        Me.Strip1.Location = New System.Drawing.Point(0, 917)
         Me.Strip1.Name = "Strip1"
-        Me.Strip1.Size = New System.Drawing.Size(1232, 30)
+        Me.Strip1.Size = New System.Drawing.Size(1232, 22)
         Me.Strip1.TabIndex = 1
         Me.Strip1.Text = "StatusStrip1"
         '
         'lblstatus
         '
         Me.lblstatus.Name = "lblstatus"
-        Me.lblstatus.Size = New System.Drawing.Size(1217, 25)
+        Me.lblstatus.Size = New System.Drawing.Size(1217, 17)
         Me.lblstatus.Spring = True
         Me.lblstatus.Text = "Status"
         Me.lblstatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'TabPage2
         '
-        Me.TabPage2.Location = New System.Drawing.Point(4, 37)
+        Me.TabPage2.Location = New System.Drawing.Point(4, 26)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(1224, 876)
+        Me.TabPage2.Size = New System.Drawing.Size(1224, 879)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "TabPage2"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -94,10 +94,10 @@ Partial Class MainForm
         'tabDevice
         '
         Me.tabDevice.Controls.Add(Me.SplitContainer2)
-        Me.tabDevice.Location = New System.Drawing.Point(4, 37)
+        Me.tabDevice.Location = New System.Drawing.Point(4, 26)
         Me.tabDevice.Name = "tabDevice"
         Me.tabDevice.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabDevice.Size = New System.Drawing.Size(1224, 868)
+        Me.tabDevice.Size = New System.Drawing.Size(1224, 887)
         Me.tabDevice.TabIndex = 0
         Me.tabDevice.Text = "UPnP Devices"
         Me.tabDevice.UseVisualStyleBackColor = True
@@ -116,7 +116,7 @@ Partial Class MainForm
         '
         Me.SplitContainer2.Panel2.Controls.Add(Me.GroupBox3)
         Me.SplitContainer2.Panel2.Controls.Add(Me.Panel2)
-        Me.SplitContainer2.Size = New System.Drawing.Size(1218, 862)
+        Me.SplitContainer2.Size = New System.Drawing.Size(1218, 881)
         Me.SplitContainer2.SplitterDistance = 438
         Me.SplitContainer2.TabIndex = 0
         '
@@ -135,8 +135,8 @@ Partial Class MainForm
         'SplitContainer1.Panel2
         '
         Me.SplitContainer1.Panel2.Controls.Add(Me.GroupBox2)
-        Me.SplitContainer1.Size = New System.Drawing.Size(438, 862)
-        Me.SplitContainer1.SplitterDistance = 656
+        Me.SplitContainer1.Size = New System.Drawing.Size(438, 881)
+        Me.SplitContainer1.SplitterDistance = 670
         Me.SplitContainer1.TabIndex = 0
         '
         'Panel1
@@ -165,7 +165,7 @@ Partial Class MainForm
         Me.cmbFilter.FormattingEnabled = True
         Me.cmbFilter.Location = New System.Drawing.Point(6, 8)
         Me.cmbFilter.Name = "cmbFilter"
-        Me.cmbFilter.Size = New System.Drawing.Size(300, 36)
+        Me.cmbFilter.Size = New System.Drawing.Size(300, 25)
         Me.cmbFilter.TabIndex = 1
         '
         'GroupBox1
@@ -177,7 +177,7 @@ Partial Class MainForm
         Me.GroupBox1.Location = New System.Drawing.Point(0, 52)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(6)
-        Me.GroupBox1.Size = New System.Drawing.Size(438, 604)
+        Me.GroupBox1.Size = New System.Drawing.Size(438, 618)
         Me.GroupBox1.TabIndex = 7
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Available UPnP Devices:"
@@ -187,10 +187,10 @@ Partial Class MainForm
         Me.lstDevices.ContextMenuStrip = Me.cMenu1
         Me.lstDevices.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lstDevices.FormattingEnabled = True
-        Me.lstDevices.ItemHeight = 28
-        Me.lstDevices.Location = New System.Drawing.Point(6, 33)
+        Me.lstDevices.ItemHeight = 17
+        Me.lstDevices.Location = New System.Drawing.Point(6, 24)
         Me.lstDevices.Name = "lstDevices"
-        Me.lstDevices.Size = New System.Drawing.Size(426, 565)
+        Me.lstDevices.Size = New System.Drawing.Size(426, 588)
         Me.lstDevices.TabIndex = 2
         '
         'cMenu1
@@ -198,18 +198,18 @@ Partial Class MainForm
         Me.cMenu1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mAddToManagedDeviceList, Me.mShowDescriptionXML})
         Me.cMenu1.Name = "cMenu1"
         Me.cMenu1.ShowImageMargin = False
-        Me.cMenu1.Size = New System.Drawing.Size(284, 64)
+        Me.cMenu1.Size = New System.Drawing.Size(198, 48)
         '
         'mAddToManagedDeviceList
         '
         Me.mAddToManagedDeviceList.Name = "mAddToManagedDeviceList"
-        Me.mAddToManagedDeviceList.Size = New System.Drawing.Size(283, 30)
+        Me.mAddToManagedDeviceList.Size = New System.Drawing.Size(197, 22)
         Me.mAddToManagedDeviceList.Text = "Add to Managed Device List"
         '
         'mShowDescriptionXML
         '
         Me.mShowDescriptionXML.Name = "mShowDescriptionXML"
-        Me.mShowDescriptionXML.Size = New System.Drawing.Size(283, 30)
+        Me.mShowDescriptionXML.Size = New System.Drawing.Size(197, 22)
         Me.mShowDescriptionXML.Text = "Show Description XML"
         '
         'GroupBox2
@@ -219,7 +219,7 @@ Partial Class MainForm
         Me.GroupBox2.Location = New System.Drawing.Point(0, 0)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Padding = New System.Windows.Forms.Padding(6)
-        Me.GroupBox2.Size = New System.Drawing.Size(438, 202)
+        Me.GroupBox2.Size = New System.Drawing.Size(438, 207)
         Me.GroupBox2.TabIndex = 5
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Managed UPnP Devices:"
@@ -228,10 +228,10 @@ Partial Class MainForm
         '
         Me.lstManagedDevices.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lstManagedDevices.FormattingEnabled = True
-        Me.lstManagedDevices.ItemHeight = 28
-        Me.lstManagedDevices.Location = New System.Drawing.Point(6, 33)
+        Me.lstManagedDevices.ItemHeight = 17
+        Me.lstManagedDevices.Location = New System.Drawing.Point(6, 24)
         Me.lstManagedDevices.Name = "lstManagedDevices"
-        Me.lstManagedDevices.Size = New System.Drawing.Size(426, 163)
+        Me.lstManagedDevices.Size = New System.Drawing.Size(426, 177)
         Me.lstManagedDevices.TabIndex = 2
         '
         'GroupBox3
@@ -240,7 +240,7 @@ Partial Class MainForm
         Me.GroupBox3.Dock = System.Windows.Forms.DockStyle.Fill
         Me.GroupBox3.Location = New System.Drawing.Point(0, 52)
         Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(776, 810)
+        Me.GroupBox3.Size = New System.Drawing.Size(776, 829)
         Me.GroupBox3.TabIndex = 8
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Query Results:"
@@ -248,16 +248,16 @@ Partial Class MainForm
         'txtDetail
         '
         Me.txtDetail.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.txtDetail.Location = New System.Drawing.Point(3, 30)
+        Me.txtDetail.Location = New System.Drawing.Point(3, 21)
         Me.txtDetail.Multiline = True
         Me.txtDetail.Name = "txtDetail"
         Me.txtDetail.ReadOnly = True
-        Me.txtDetail.Size = New System.Drawing.Size(770, 777)
+        Me.txtDetail.Size = New System.Drawing.Size(770, 805)
         Me.txtDetail.TabIndex = 1
         '
         'Panel2
         '
-        Me.Panel2.Controls.Add(Me.ComboBox2)
+        Me.Panel2.Controls.Add(Me.cmbUtil)
         Me.Panel2.Controls.Add(Me.Button2)
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Top
         Me.Panel2.Location = New System.Drawing.Point(0, 0)
@@ -265,16 +265,16 @@ Partial Class MainForm
         Me.Panel2.Size = New System.Drawing.Size(776, 52)
         Me.Panel2.TabIndex = 7
         '
-        'ComboBox2
+        'cmbUtil
         '
-        Me.ComboBox2.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+        Me.cmbUtil.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.ComboBox2.FormattingEnabled = True
-        Me.ComboBox2.Location = New System.Drawing.Point(6, 8)
-        Me.ComboBox2.Name = "ComboBox2"
-        Me.ComboBox2.Size = New System.Drawing.Size(638, 36)
-        Me.ComboBox2.TabIndex = 1
+        Me.cmbUtil.FormattingEnabled = True
+        Me.cmbUtil.Location = New System.Drawing.Point(6, 8)
+        Me.cmbUtil.Name = "cmbUtil"
+        Me.cmbUtil.Size = New System.Drawing.Size(638, 25)
+        Me.cmbUtil.TabIndex = 1
         '
         'Button2
         '
@@ -295,12 +295,12 @@ Partial Class MainForm
         Me.tbControl.Location = New System.Drawing.Point(0, 0)
         Me.tbControl.Name = "tbControl"
         Me.tbControl.SelectedIndex = 0
-        Me.tbControl.Size = New System.Drawing.Size(1232, 909)
+        Me.tbControl.Size = New System.Drawing.Size(1232, 917)
         Me.tbControl.TabIndex = 2
         '
         'MainForm
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(11.0!, 28.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 17.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1232, 939)
         Me.Controls.Add(Me.tbControl)
@@ -347,7 +347,7 @@ Partial Class MainForm
     Friend WithEvents GroupBox2 As System.Windows.Forms.GroupBox
     Friend WithEvents lstManagedDevices As System.Windows.Forms.ListBox
     Friend WithEvents Panel2 As System.Windows.Forms.Panel
-    Friend WithEvents ComboBox2 As System.Windows.Forms.ComboBox
+    Friend WithEvents cmbUtil As System.Windows.Forms.ComboBox
     Friend WithEvents Button2 As System.Windows.Forms.Button
     Friend WithEvents GroupBox3 As System.Windows.Forms.GroupBox
     Friend WithEvents txtDetail As System.Windows.Forms.TextBox

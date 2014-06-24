@@ -56,9 +56,9 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute()>  _
-        Public Property SearchActions() As Global.System.Collections.Specialized.StringCollection
+        Public Property SearchActions() As Global.VBDeviceSpy.SearchActions
             Get
-                Return CType(Me("SearchActions"),Global.System.Collections.Specialized.StringCollection)
+                Return CType(Me("SearchActions"),Global.VBDeviceSpy.SearchActions)
             End Get
             Set
                 Me("SearchActions") = value
@@ -66,14 +66,13 @@ Namespace My
         End Property
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
-        Public Property Test() As String
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute()>  _
+        Public Property SavedDevices() As Global.VBDeviceSpy.SavedDevices
             Get
-                Return CType(Me("Test"),String)
+                Return CType(Me("SavedDevices"),Global.VBDeviceSpy.SavedDevices)
             End Get
             Set
-                Me("Test") = value
+                Me("SavedDevices") = value
             End Set
         End Property
     End Class

@@ -18,6 +18,11 @@ Namespace UPnPDeviceManager
         incompleteDevice
     End Enum
 
+
+    ''' <summary>
+    ''' The Network Manager Class performs 3 important functions. (1) To Scan the Network for all or specific classes of device. (2) To try and force load a device and (3) To Create "ManagedDevices" including the concept of a LinkedDevice
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Class NetworkManager
         Public Event DeviceDiscoveryEvent(device As UPnPDevice, eventType As eDeviceDiscoveryEvent)
         Public Event ManagedDeviceEvent(device As UPnPDevice, managedDeviceEvent As eManagedDeviceEvent)
@@ -35,27 +40,59 @@ Namespace UPnPDeviceManager
 
 #Region "Device Scan Handling Events"
 
+        '// This is a callback that is called when a new device is found on the network
         Private Sub HandleAddedDevice(sender As UPnPSmartControlPoint, device As UPnPDevice)
             HandleDeviceChange(device, eManagedDeviceEvent.addDevice)
         End Sub
 
+        '// This is a callback that is called when a device is removed from the network
         Private Sub HandleRemovedDevice(sender As UPnPSmartControlPoint, device As UPnPDevice)
             HandleDeviceChange(device, eManagedDeviceEvent.removeDevice)
         End Sub
 
+        '// This is a callback that is called when a Forced Add succeeds and a device is found
         Private Sub HandleForceAddDevice(sender As OpenSource.UPnP.UPnPDeviceFactory, device As OpenSource.UPnP.UPnPDevice, URL As System.Uri)
             HandleDeviceChange(device, eManagedDeviceEvent.addDevice)
         End Sub
 
+        '// This is a callback that is called when a Forced Add FAILS
         Private Sub HandleForceAddFailed(sender As UPnPDeviceFactory, LocationUri As Uri, e As Exception, urn As String)
             RaiseEvent DeviceDiscoveryEvent(Nothing, eDeviceDiscoveryEvent.failed)
         End Sub
 
+        '// this is a sub whose function is to put the add/remove device activity on the UI thread and then call ADD or REMOVE Available Device on that thread.
+        Private Sub HandleDeviceChange(device As UPnPDevice, deviceAction As eManagedDeviceEvent)
+            Select Case deviceAction
+                Case eManagedDeviceEvent.addDevice
+                    'Execute DoSomethingElse on the same thread that the current object was created on.
+                    threadingContext.Post(AddressOf AddAvailableDevice, device)
+                Case eManagedDeviceEvent.removeDevice
+                    threadingContext.Post(AddressOf RemoveAvailableDevice, device)
+            End Select
+        End Sub
+
+        '// This is where we actually Add a Device to the system, by placing it in the availabledevices list.
+        Private Sub AddAvailableDevice(device As UPnPDevice)
+            If Not AvailableDevices.Contains(device) Then
+                AvailableDevices.Add(device)
+                RaiseEvent DeviceDiscoveryEvent(device, eDeviceDiscoveryEvent.added)
+            End If
+        End Sub
+
+        '// This is where we actually Remove a Device to the system, by taking it out of the availabledevices list.
+        Private Sub RemoveAvailableDevice(device As UPnPDevice)
+            '// to do
+            If AvailableDevices.Contains(device) Then
+                AvailableDevices.Remove(device)
+                RaiseEvent DeviceDiscoveryEvent(device, eDeviceDiscoveryEvent.removed)
+            End If
+        End Sub
 
 #End Region
 
-#Region "Public Methods"
+#Region "Device Discovery"
 
+        '// ResetSystem
         Private Sub ResetSystem()
             Me.scp = Nothing
             AvailableDevices.Clear()
@@ -84,6 +121,7 @@ Namespace UPnPDeviceManager
             End If
         End Sub
 
+        '// Try and force add a known device
         Private Sub ForceAddDevice(deviceDescriptionURL As String)
             Try
                 Dim NetworkUri = New Uri(deviceDescriptionURL)
@@ -94,6 +132,10 @@ Namespace UPnPDeviceManager
                 MessageBox.Show("Invalid URI!")
             End Try
         End Sub
+
+#End Region
+
+#Region "ManagedDevice Methods"
 
         '// public function to try and add a device to the manages device list
         Public Sub AddToManagedDevices(device As UPnPDevice)
@@ -128,7 +170,7 @@ Namespace UPnPDeviceManager
             Select Case device.User
                 Case (HAS_CONTENTDIRECTORY + HAS_AVTRANSPORT)
                     '// we've found a complete device. Add it.
-                    AddManagedDevice(device, ">>" & device.FriendlyName)
+                    AddManagedDevice(device, device.FriendlyName)
                     RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.addDevice)
                 Case HAS_CONTENTDIRECTORY
                     '// find matching AVTransport
@@ -160,8 +202,7 @@ Namespace UPnPDeviceManager
 
         '// add a device to the managed device collection and setup the User2 variable with a descriptive name
         Private Sub AddManagedDevice(device As UPnPDevice, description As String)
-            device.Reserved = "XXX" & description
-
+            device.ManagedDeviceName = "MD:" & description
             If Not ManagedDevices.Contains(device) Then
                 ManagedDevices.Add(device)
                 RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.addDevice)
@@ -210,36 +251,12 @@ Namespace UPnPDeviceManager
         '// add a device as a child to its parent
         Public Sub LinkChildDevice(ParentDevice As UPnPDevice, ChildDevice As UPnPDevice)
             ParentDevice.AddDevice(ChildDevice)
+            ParentDevice.IsLinkedDevice = True
+            ParentDevice.LinkedDeviceName = ChildDevice.UniqueDeviceName
+            ChildDevice.LinkedDeviceName = ParentDevice.UniqueDeviceName
+            ChildDevice.IsLinkedDevice = True
         End Sub
 
-
-
-#End Region
-
-#Region "Private Methods"
-        Private Sub AddAvailableDevice(device As UPnPDevice)
-            If Not AvailableDevices.Contains(device) Then
-                AvailableDevices.Add(device)
-                RaiseEvent DeviceDiscoveryEvent(device, eDeviceDiscoveryEvent.added)
-            End If
-        End Sub
-        Private Sub RemoveAvailableDevice(device As UPnPDevice)
-            '// to do
-            If AvailableDevices.Contains(device) Then
-                AvailableDevices.Remove(device)
-                RaiseEvent DeviceDiscoveryEvent(device, eDeviceDiscoveryEvent.removed)
-            End If
-        End Sub
-        '// this is a sub whose function is to put the add/remove device activity on the UI thread
-        Private Sub HandleDeviceChange(device As UPnPDevice, deviceAction As eManagedDeviceEvent)
-            Select Case deviceAction
-                Case eManagedDeviceEvent.addDevice
-                    'Execute DoSomethingElse on the same thread that the current object was created on.
-                    threadingContext.Post(AddressOf AddAvailableDevice, device)
-                Case eManagedDeviceEvent.removeDevice
-                    threadingContext.Post(AddressOf RemoveAvailableDevice, device)
-            End Select
-        End Sub
 #End Region
 
         Protected Overrides Sub Finalize()
