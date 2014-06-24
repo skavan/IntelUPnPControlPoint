@@ -1,6 +1,13 @@
 ﻿Imports OpenSource.UPnP
+Imports System.Runtime.CompilerServices
 
 Module modUtils
+
+    '<Extension()> _
+    'Public Function ManagedDeviceName(ByVal device As UPnPDevice) As String
+    '    Return device.User2.ToString & "XXX"
+    'End Function
+
     Public Function ParseDeviceTree(device As UPnPDevice) As String
         Dim tree As String = ""
         tree = device.FriendlyName & " | " & device.LocationURL & vbCrLf
@@ -26,7 +33,7 @@ Module modUtils
     End Function
 
     Private Function AddService(service As UPnPService, tabLevel As Integer) As String
-        Dim szService As String = Indent(tabLevel) & service.ServiceURN & vbCrLf        
+        Dim szService As String = Indent(tabLevel) & service.ServiceURN & vbCrLf
         Return szService
     End Function
 

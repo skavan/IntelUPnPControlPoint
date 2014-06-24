@@ -57,6 +57,7 @@ namespace OpenSource.UPnP
         public object User = null;
         public object User2 = null;
         public object User3 = null;
+        public string ManagedDeviceName = "";
         public object Reserved = null;
 
         private string _BootID = "";

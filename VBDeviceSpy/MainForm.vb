@@ -125,10 +125,11 @@ Public Class MainForm
         lstManagedDevices.ContextMenuStrip = cMenu1
 
         lstDevices.DataSource = disc.AvailableDevices
-        lstDevices.DisplayMember = "FriendlyName"
+        lstDevices.DisplayMember = "ManufacturerURL"
         lstManagedDevices.DataSource = disc.ManagedDevices
-        lstManagedDevices.DisplayMember = "FriendlyName"
+        lstManagedDevices.DisplayMember = "User"
         'lstDevices.DisplayMember = "FriendlyName"
+
     End Sub
 #End Region
 
@@ -214,14 +215,14 @@ Public Class MainForm
         Select Case menuItem1.Name
             Case "AddManagedDevice"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
-                disc.AddManagedDevice(device)
+                disc.AddToManagedDevices(device)
 
                 'If Not lstManagedDevices.Items.Contains(device) Then
                 '    lstManagedDevices.Items.Add(device)
                 'End If
             Case "RemoveManagedDevice"
                 Dim device As UPnPDevice = lstManagedDevices.SelectedItem
-                disc.RemoveManagedDevice(device)
+                disc.RemoveFromManagedDevices(device)
                 'lstManagedDevices.Items.Remove(device)
             Case "ShowXML"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
