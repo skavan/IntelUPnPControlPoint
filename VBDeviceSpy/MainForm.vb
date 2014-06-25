@@ -64,22 +64,21 @@ Public Class MainForm
 
 #End Region
 
-#Region "Initialization & Cleanup"
+#Region "Initialization & Closing"
 
     '// save settings and cleanup
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
 
         Dim myCol As SearchActions = My.Settings.SearchActions
         If myCol Is Nothing Then myCol = New SearchActions
-        Dim mySavedDevices As SavedDevices = My.Settings.SavedDevices
-        If mySavedDevices Is Nothing Then mySavedDevices = New SavedDevices
+        Dim mySavedDevices As New SavedDevices
+        'If mySavedDevices Is Nothing Then mySavedDevices = New SavedDevices
 
 
         For Each device As UPnPDevice In disc.ManagedDevices
-            '// Create a specific device entry
+            '// Create a specific device entry shortcut
             Dim searchAction1 As New SearchAction(device.LocationURL, device.FriendlyName, SearchAction.eSearchType.deviceIP)
             If Not myCol.Contains(searchAction1) Then myCol.Add(searchAction1)
-
 
             ''// Create a general upnp urn entry
             'Dim searchAction2 As New SearchAction(device.DeviceURN, "*DEVICE TYPE: " & device.StandardDeviceType, SearchAction.eSearchType.devicePattern)
@@ -95,7 +94,6 @@ Public Class MainForm
             If Not mySavedDevices.Contains(savedDevice) Then
                 mySavedDevices.Add(savedDevice)
             End If
-
 
 
         Next

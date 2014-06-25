@@ -117,6 +117,11 @@ namespace OpenSource.UPnP
 			{
 				if (MonitorList.ContainsValue(obj) == true) 
 				{
+					if (SafeNotifyTimer == null)
+					{
+						MonitorList.RemoveAt(MonitorList.IndexOfValue(obj));
+						return true;
+					}
 					SafeNotifyTimer.Stop();
 					//NotifyTimer.Stop();
 					RetVal = true;

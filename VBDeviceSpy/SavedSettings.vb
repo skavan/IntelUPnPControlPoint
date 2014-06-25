@@ -12,6 +12,8 @@ End Class
 
 '// The serializable SearchSpec Class
 Public Class SearchAction
+    Implements IEquatable(Of SearchAction)
+
 
     Enum eSearchType
         devicePattern
@@ -36,6 +38,13 @@ Public Class SearchAction
         Return Me.Filter & delimiter & Me.FriendlyName & delimiter & Me.SearchType
     End Function
 
+    Public Function Equals1(other As SearchAction) As Boolean Implements IEquatable(Of SearchAction).Equals
+        If Filter = other.Filter Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
 End Class
 
 '// A Small Class to hold the collection of saved devices
@@ -45,6 +54,8 @@ Public Class SavedDevices
 End Class
 
 Public Class SavedDevice
+    Implements IEquatable(Of SavedDevice)
+
     Public Property DisplayName As String
     Public Property UniqueDeviceName As String
     Public Property IsLinkedDevice As Boolean
@@ -69,4 +80,8 @@ Public Class SavedDevice
         Me.IsLinkedDevice = isLinkedDevice
         Me.LinkedDeviceName = linkedDevice
     End Sub
+
+    Public Function Equals1(other As SavedDevice) As Boolean Implements IEquatable(Of SavedDevice).Equals
+        If Me.UniqueDeviceName = other.UniqueDeviceName Then Return True Else Return False
+    End Function
 End Class

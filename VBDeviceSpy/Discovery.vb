@@ -170,8 +170,12 @@ Namespace UPnPDeviceManager
             Select Case device.User
                 Case (HAS_CONTENTDIRECTORY + HAS_AVTRANSPORT)
                     '// we've found a complete device. Add it.
-                    AddManagedDevice(device, device.FriendlyName)
-                    RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.addDevice)
+                    Dim topDevice As UPnPDevice = FindTopMostDevice(device)
+                    If topDevice.UniqueDeviceName <> device.UniqueDeviceName Then
+                        ForceAddDevice(topDevice.LocationURL)
+                    End If
+                    AddManagedDevice(topDevice, topDevice.FriendlyName)
+                    RaiseEvent ManagedDeviceEvent(topDevice, eManagedDeviceEvent.addDevice)
                 Case HAS_CONTENTDIRECTORY
                     '// find matching AVTransport
                     '// create child-parent
@@ -248,6 +252,14 @@ Namespace UPnPDeviceManager
             End If
         End Function
 
+        Private Function FindTopMostDevice(device As UPnPDevice) As UPnPDevice
+            If Not device.ParentDevice Is Nothing Then
+                Return FindTopMostDevice(device.ParentDevice)
+            Else
+                Return device
+            End If
+        End Function
+
         '// add a device as a child to its parent
         Public Sub LinkChildDevice(ParentDevice As UPnPDevice, ChildDevice As UPnPDevice)
             ParentDevice.AddDevice(ChildDevice)
@@ -262,7 +274,9 @@ Namespace UPnPDeviceManager
         Protected Overrides Sub Finalize()
             If Not scp Is Nothing Then
                 For Each device In scp.Devices
-                    scp.ForceDisposeDevice(device)
+                    If Not device Is Nothing Then
+                        scp.ForceDisposeDevice(device)
+                    End If
                 Next
                 scp = Nothing
             End If
