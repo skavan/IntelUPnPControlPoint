@@ -260,8 +260,13 @@ Namespace UPnPDeviceManager
 #End Region
 
         Protected Overrides Sub Finalize()
+            If Not scp Is Nothing Then
+                For Each device In scp.Devices
+                    scp.ForceDisposeDevice(device)
+                Next
+                scp = Nothing
+            End If
             EventLogger.Enabled = False
-            scp = Nothing
             MyBase.Finalize()
         End Sub
 

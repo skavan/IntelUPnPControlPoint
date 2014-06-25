@@ -42,9 +42,26 @@ Public Class MainForm
 #End Region
 
 #Region "External Event Sinks"
+
+    '// Raised from the devcie discovery process. Normally on a non-GUI thread, hence the MyBase.Invoke.
     Private Sub disc_DeviceScanEvent(device As UPnPDevice, eventType As UPnPDeviceManager.eDeviceDiscoveryEvent) Handles disc.DeviceDiscoveryEvent
         MyBase.Invoke(New delUpdateDeviceList(AddressOf UpdateDeviceList), {device, eventType})
     End Sub
+
+    '// Raised when we try and create a "Managed Device"
+    Private Sub disc_ManagedDeviceEvent(device As UPnPDevice, managedDeviceEvent As UPnPDeviceManager.eManagedDeviceEvent) Handles disc.ManagedDeviceEvent
+        Select Case managedDeviceEvent
+            Case UPnPDeviceManager.eManagedDeviceEvent.addDevice
+                lblstatus.Text = device.FriendlyName & " added to Managed Device List"
+            Case UPnPDeviceManager.eManagedDeviceEvent.invalidDevice
+                lblstatus.Text = device.FriendlyName & " is not a Manageable Device"
+            Case UPnPDeviceManager.eManagedDeviceEvent.removeDevice
+                lblstatus.Text = device.FriendlyName & " removed Managed Device List"
+            Case UPnPDeviceManager.eManagedDeviceEvent.incompleteDevice
+                lblstatus.Text = device.FriendlyName & " incomplete Managed Device List"
+        End Select
+    End Sub
+
 #End Region
 
 #Region "Initialization & Cleanup"
@@ -64,9 +81,9 @@ Public Class MainForm
             If Not myCol.Contains(searchAction1) Then myCol.Add(searchAction1)
 
 
-            '// Create a general upnp urn entry
-            Dim searchAction2 As New SearchAction(device.DeviceURN, "*DEVICE TYPE: " & device.StandardDeviceType, SearchAction.eSearchType.devicePattern)
-            If Not myCol.Contains(searchAction2) Then myCol.Add(searchAction2)
+            ''// Create a general upnp urn entry
+            'Dim searchAction2 As New SearchAction(device.DeviceURN, "*DEVICE TYPE: " & device.StandardDeviceType, SearchAction.eSearchType.devicePattern)
+            'If Not myCol.Contains(searchAction2) Then myCol.Add(searchAction2)
 
             '// Create a saved device
             Dim savedDevice As SavedDevice
@@ -75,7 +92,10 @@ Public Class MainForm
             Else
                 savedDevice = New SavedDevice(device.ManagedDeviceName, device.UniqueDeviceName, False, "")
             End If
-            mySavedDevices.Add(savedDevice)
+            If Not mySavedDevices.Contains(savedDevice) Then
+                mySavedDevices.Add(savedDevice)
+            End If
+
 
 
         Next
@@ -96,7 +116,9 @@ Public Class MainForm
         cmbFilter.Items.Clear()
         cmbFilter.DisplayMember = "FriendlyName"
         cmbFilter.Items.Add(New SearchAction("", " All UPnP Devices", SearchAction.eSearchType.devicePattern))
-
+        cmbFilter.Items.Add(New SearchAction("urn:schemas-upnp-org:device:MediaRenderer:1", "*DEVICE TYPE: Media Renderers", SearchAction.eSearchType.devicePattern))
+        cmbFilter.Items.Add(New SearchAction("urn:schemas-upnp-org:device:MediaServer:1", "*DEVICE TYPE: Media Servers", SearchAction.eSearchType.devicePattern))
+        cmbFilter.Items.Add(New SearchAction("urn:schemas-upnp-org:device:ZonePlayer:1", "*DEVICE TYPE: Zone Players", SearchAction.eSearchType.devicePattern))
 
         Dim searchActions As SearchActions = My.Settings.SearchActions
 
@@ -226,20 +248,5 @@ Public Class MainForm
 #End Region
 
 
-
-
-    Private Sub disc_ManagedDeviceEvent(device As UPnPDevice, managedDeviceEvent As UPnPDeviceManager.eManagedDeviceEvent) Handles disc.ManagedDeviceEvent
-        Select Case managedDeviceEvent
-            Case UPnPDeviceManager.eManagedDeviceEvent.addDevice
-
-                lblstatus.Text = device.FriendlyName & " added to Managed Device List"
-            Case UPnPDeviceManager.eManagedDeviceEvent.invalidDevice
-                lblstatus.Text = device.FriendlyName & " is not a Manageable Device"
-            Case UPnPDeviceManager.eManagedDeviceEvent.removeDevice
-                lblstatus.Text = device.FriendlyName & " removed Managed Device List"
-            Case UPnPDeviceManager.eManagedDeviceEvent.incompleteDevice
-                lblstatus.Text = device.FriendlyName & " incomplete Managed Device List"
-        End Select
-    End Sub
 
 End Class
