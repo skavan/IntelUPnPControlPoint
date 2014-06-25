@@ -51,11 +51,11 @@ Public Class MainForm
     '// Raised when we try and create a "Managed Device"
     Private Sub disc_ManagedDeviceEvent(device As UPnPDevice, managedDeviceEvent As UPnPDeviceManager.eManagedDeviceEvent) Handles disc.ManagedDeviceEvent
         Select Case managedDeviceEvent
-            Case UPnPDeviceManager.eManagedDeviceEvent.addDevice
+            Case UPnPDeviceManager.eManagedDeviceEvent.addedDevice
                 lblstatus.Text = device.FriendlyName & " added to Managed Device List"
             Case UPnPDeviceManager.eManagedDeviceEvent.invalidDevice
                 lblstatus.Text = device.FriendlyName & " is not a Manageable Device"
-            Case UPnPDeviceManager.eManagedDeviceEvent.removeDevice
+            Case UPnPDeviceManager.eManagedDeviceEvent.removedDevice
                 lblstatus.Text = device.FriendlyName & " removed Managed Device List"
             Case UPnPDeviceManager.eManagedDeviceEvent.incompleteDevice
                 lblstatus.Text = device.FriendlyName & " incomplete Managed Device List"
@@ -87,9 +87,9 @@ Public Class MainForm
             '// Create a saved device
             Dim savedDevice As SavedDevice
             If device.IsLinkedDevice Then
-                savedDevice = New SavedDevice(device.ManagedDeviceName, device.UniqueDeviceName, True, device.LinkedDeviceName)
+                savedDevice = New SavedDevice(device.ManagedDeviceName, device.UniqueDeviceName, True, device.LocationURL, device.LinkedLocationURL)
             Else
-                savedDevice = New SavedDevice(device.ManagedDeviceName, device.UniqueDeviceName, False, "")
+                savedDevice = New SavedDevice(device.ManagedDeviceName, device.UniqueDeviceName, device.LocationURL)
             End If
             If Not mySavedDevices.Contains(savedDevice) Then
                 mySavedDevices.Add(savedDevice)
@@ -206,15 +206,40 @@ Public Class MainForm
         cMenu1.Items.Clear()
         Dim menuItem1 As ToolStripMenuItem = Nothing
         Dim menuItem2 As ToolStripMenuItem = Nothing
+        Dim menuItem3 As ToolStripMenuItem = Nothing
 
         If control.Name = lstDevices.Name Then
-            menuItem1 = New ToolStripMenuItem("Add to Managed Devices List [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "AddManagedDevice")
-            menuItem2 = New ToolStripMenuItem("Show Device Description [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "ShowXML")
+            Dim device As UPnPDevice = lstDevices.SelectedItem
+            If disc.CheckForService(device, UPnPDeviceManager.NetworkManager.AVTRANSPORT) Then
+                If disc.CheckForService(device, UPnPDeviceManager.NetworkManager.CONTENTDIRECTORY) Then
+                    menuItem1 = New ToolStripMenuItem("Add to Managed Devices List [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "AddManagedDevice")
+                Else
+                    Dim siblingDevice As UPnPDevice = disc.FindSiblingDevice(device, UPnPDeviceManager.NetworkManager.CONTENTDIRECTORY)
+                    If siblingDevice IsNot Nothing Then
+                        menuItem1 = New ToolStripMenuItem("Add TRANSPORT ONLY to Managed Devices List [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "AddManagedDevice")
+                        menuItem2 = New ToolStripMenuItem("Add COMPOUND device to Managed Devices List [" & control.SelectedItem.FriendlyName & "+" & siblingDevice.FriendlyName & "]", Nothing, AddressOf mOnClick, "AddCompoundDevice")
+                        menuItem2.Tag = siblingDevice
+                    Else
+                        '// AvTransport Only
+                        menuItem1 = New ToolStripMenuItem("Add TRANSPORT ONLY to Managed Devices List [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "AddManagedDevice")
+                        menuItem2 = New ToolStripMenuItem("Add COMPOUND device to Managed Devices List [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "AddCompoundDevice")
+                        menuItem2.Enabled = False
+                    End If
+                End If
+
+            End If
+            menuItem3 = New ToolStripMenuItem("Show Device Description [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "ShowXML")
+            '//menuItem1 = New ToolStripMenuItem("Add to Managed Devices List [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "AddManagedDevice")
+
         ElseIf control.Name = lstManagedDevices.Name Then
             menuItem1 = New ToolStripMenuItem("Remove from Managed Devices List [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "RemoveManagedDevice")
             menuItem2 = New ToolStripMenuItem("Show Device Description [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "ShowXMLManaged")
         End If
-        cMenu1.Items.AddRange({menuItem1, menuItem2})
+
+        If menuItem1 IsNot Nothing Then cMenu1.Items.Add(menuItem1)
+        If menuItem2 IsNot Nothing Then cMenu1.Items.Add(menuItem2)
+        If menuItem3 IsNot Nothing Then cMenu1.Items.Add(menuItem3)
+
         control.ContextMenuStrip = cMenu1
         control.ContextMenuStrip.Show(control, New Point(e.X, e.Y))
     End Sub
@@ -224,27 +249,37 @@ Public Class MainForm
         Select Case menuItem1.Name
             Case "AddManagedDevice"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
-                disc.AddToManagedDevices(device)
-                If lstManagedDevices.DataSource Is Nothing Then
-                    lstManagedDevices.DataSource = disc.ManagedDevices
-                    lstManagedDevices.DisplayMember = "ManagedDeviceName"
-                End If
+                disc.ManagedDevicesAction(device, UPnPDeviceManager.eManagedDevicesAction.addDevice)
+                
+            Case "AddCompoundDevice"
+                Dim device As UPnPDevice = lstDevices.SelectedItem
+                device.IsLinkedDevice = True
+
+                disc.ManagedDevicesAction(device, UPnPDeviceManager.eManagedDevicesAction.addLinkedDevice)
 
             Case "RemoveManagedDevice"
                 Dim device As UPnPDevice = lstManagedDevices.SelectedItem
-                disc.RemoveFromManagedDevices(device)
-                'lstManagedDevices.Items.Remove(device)
+                disc.ManagedDevicesAction(device, UPnPDeviceManager.eManagedDevicesAction.removeDevice)
+
             Case "ShowXML"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
                 System.Diagnostics.Process.Start(device.LocationURL)
+
             Case "ShowXMLManaged"
                 Dim device As UPnPDevice = lstManagedDevices.SelectedItem
                 System.Diagnostics.Process.Start(device.LocationURL)
         End Select
+        If lstManagedDevices.DataSource Is Nothing Then
+            lstManagedDevices.DataSource = disc.ManagedDevices
+            lstManagedDevices.DisplayMember = "ManagedDeviceName"
+        End If
     End Sub
 
 #End Region
 
 
 
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        disc.NetworkScan("http://192.168.1.126:9000/plugins/UPnP/MediaServer.xml", True)
+    End Sub
 End Class

@@ -191,7 +191,7 @@ namespace OpenSource.UPnP
         public String UniqueDeviceName;
         public String ManagedDeviceName { get; set; }
         public bool IsLinkedDevice { get; set; }
-        public String LinkedDeviceName { get; set; }
+        public String LinkedLocationURL { get; set; }
         public int Major;
         public int Minor;
         public int ExpirationTimeout;
