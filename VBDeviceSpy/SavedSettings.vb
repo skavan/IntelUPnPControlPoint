@@ -77,7 +77,7 @@ Public Class SavedDevice
     End Sub
 
     Sub New(displayName As String, uniqueDeviceName As String, isLinkedDevice As Boolean, locationURL As String, linkedLocationURL As String)
-        
+        Init(displayName, uniqueDeviceName, isLinkedDevice, locationURL, linkedLocationURL)
     End Sub
 
     Sub Init(displayName As String, uniqueDeviceName As String, isLinkedDevice As Boolean, locationURL As String, linkedLocationURL As String)

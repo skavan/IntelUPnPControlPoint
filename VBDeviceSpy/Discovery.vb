@@ -140,18 +140,19 @@ Namespace UPnPDeviceManager
             End Try
         End Sub
 
+        Public Function isAvailableDevice(locationURL As String) As Boolean
+            For Each device As UPnPDevice In AvailableDevices
+                If device.LocationURL = locationURL Then
+                    Return True
+                End If
+            Next
+            Return False
+        End Function
+
+
 #End Region
 
 #Region "ManagedDevice Methods"
-
-        '// public function to try and add a device to the manages device list
-        'Public Sub OLDAddToManagedDevices(device As UPnPDevice)
-        '    If Not device Is Nothing Then
-        '        If Not ManagedDevices.Contains(device) Then
-        '            CheckValidManagedDevice(device)
-        '        End If
-        '    End If
-        'End Sub
 
         '// here's where we do a lot of clever stuff - from simply addive  acomplete device to the managed device list to
         '// adding an incomplete AVTransport device to creating a combo device and linking them and adding the linked device.
@@ -256,7 +257,7 @@ Namespace UPnPDeviceManager
         '// add a device to the managed device collection and setup the User2 variable with a descriptive name
         Private Sub AddManagedDevice(device As UPnPDevice, description As String)
             device.ManagedDeviceName = description
-            If Not ManagedDevices.Contains(device) Then
+            If Not isManagedDevice(device.LocationURL) Then
                 ManagedDevices.Add(device)
                 RaiseEvent ManagedDeviceEvent(device, eManagedDeviceEvent.addedDevice)
             End If
@@ -320,20 +321,71 @@ Namespace UPnPDeviceManager
 
         Private Sub UnlinkDevices(device As UPnPDevice)
             Dim childDevice As UPnPDevice
-            For Each childDevice In device.EmbeddedDevices
-                If childDevice.LocationURL = device.LinkedLocationURL Then          '// find the linked device
-                    If AvailableDevices.Contains(childDevice) Then AvailableDevices.Remove(childDevice)
-                    If AvailableDevices.Contains(device) Then AvailableDevices.Remove(device)
-                    Dim parentURL As String = device.LocationURL               '// Get the location uri
-                    Dim childURL As String = childDevice.LocationURL
+            Dim childURL As String = ""
+            Dim parentURL As String = device.LocationURL                                            '// Get the location uri
 
-                    scp.ForceDisposeDevice(device)                                      '//KIll the parent
-                    scp.ForceDisposeDevice(childDevice)                                 '// Kill the childdevice
-                    ForceAddDevice(parentURL)
-                    ForceAddDevice(childURL)
+            childDevice = getAvailableDevice(device.LinkedLocationURL)                              '// get the child device by LocationURL
+
+            If childDevice IsNot Nothing Then                                                       '// if it exists, remove it, kill it
+                childURL = childDevice.LocationURL
+                If isAvailableDevice(childDevice.LocationURL) Then AvailableDevices.Remove(childDevice)
+                Try
+                    scp.ForceDisposeDevice(childDevice)                                             '// Kill the childdevice
+                Catch ex As Exception
+                End Try
+            End If
+
+            If isAvailableDevice(device.LocationURL) Then AvailableDevices.Remove(device)
+            Try
+                scp.ForceDisposeDevice(device)                                                  '//KIll the parent
+            Catch ex As Exception
+
+            End Try
+
+            ForceAddDevice(parentURL)
+            ForceAddDevice(childURL)
+
+
+            'For Each childDevice In device.EmbeddedDevices
+            '    If childDevice.LocationURL = device.LinkedLocationURL Then          '// find the linked device
+
+            '        Dim childURL As String = childDevice.LocationURL
+            '        If isAvailableDevice(childDevice.LocationURL) Then AvailableDevices.Remove(childDevice)
+            '        'If AvailableDevices.Contains(childDevice) Then AvailableDevices.Remove(childDevice)
+            '        'If AvailableDevices.Contains(device) Then AvailableDevices.Remove(device)
+            '        Try
+            '            scp.ForceDisposeDevice(childDevice)                                 '// Kill the childdevice
+            '        Catch ex As Exception
+            '        End Try
+            '        'ForceAddDevice(parentURL)
+            '        'ForceAddDevice(childURL)
+            '        Exit For
+            '    End If
+            'Next
+
+
+            
+
+
+        End Sub
+
+        Public Function isManagedDevice(locationURL As String) As Boolean
+            For Each device As UPnPDevice In ManagedDevices
+                If device.LocationURL = locationURL Then
+                    Return True
                 End If
             Next
-        End Sub
+            Return False
+        End Function
+
+        Public Function getAvailableDevice(locationURL As String) As UPnPDevice
+            For Each device As UPnPDevice In AvailableDevices
+                If device.LocationURL = locationURL Then
+                    Return device
+                End If
+            Next
+            Return Nothing
+        End Function
 #End Region
 
         Protected Overrides Sub Finalize()

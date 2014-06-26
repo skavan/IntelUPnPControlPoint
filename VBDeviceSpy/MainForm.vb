@@ -3,7 +3,7 @@
 Public Class MainForm
     Dim WithEvents disc As New UPnPDeviceManager.NetworkManager
     Delegate Sub delUpdateDeviceList(device As UPnPDevice, eventType As UPnPDeviceManager.eDeviceDiscoveryEvent)
-
+    Dim isPreloading As Boolean = False
 
 #Region "GUI Triggered Events & Methods"
 
@@ -71,8 +71,8 @@ Public Class MainForm
 
         Dim myCol As SearchActions = My.Settings.SearchActions
         If myCol Is Nothing Then myCol = New SearchActions
-        Dim mySavedDevices As New SavedDevices
-        'If mySavedDevices Is Nothing Then mySavedDevices = New SavedDevices
+        Dim mySavedDevices As SavedDevices = My.Settings.SavedDevices
+        If mySavedDevices Is Nothing Then mySavedDevices = New SavedDevices
 
 
         For Each device As UPnPDevice In disc.ManagedDevices
@@ -111,6 +111,8 @@ Public Class MainForm
 
     Private Sub Init()
         'Dim s1 As New SearchSpec("192.168.1.160", "SqueezeBox @ 192.168.1.160", SearchSpec.eSearchType.deviceIP)
+        Me.Show()
+        Application.DoEvents()
         cmbFilter.Items.Clear()
         cmbFilter.DisplayMember = "FriendlyName"
         cmbFilter.Items.Add(New SearchAction("", " All UPnP Devices", SearchAction.eSearchType.devicePattern))
@@ -120,9 +122,20 @@ Public Class MainForm
 
         Dim searchActions As SearchActions = My.Settings.SearchActions
 
-        If Not searchActions Is Nothing Then
+        If searchActions IsNot Nothing Then
             For Each searchAction In My.Settings.SearchActions
                 If Not cmbFilter.Items.Contains(searchAction) Then cmbFilter.Items.Add(searchAction)
+            Next
+        End If
+
+        Dim savedDevices As SavedDevices = My.Settings.SavedDevices
+        If savedDevices IsNot Nothing Then
+            isPreloading = True
+            For Each savedDevice As SavedDevice In savedDevices
+                If savedDevice.IsLinkedDevice Then
+                    disc.NetworkScan(savedDevice.LinkedLocationURL, True)
+                End If
+                disc.NetworkScan(savedDevice.LocationURL, True)
             Next
         End If
 
@@ -147,7 +160,53 @@ Public Class MainForm
                     lstDevices.DataSource = disc.AvailableDevices
                     'lstDevices.DisplayMember = "FriendlyName"
                 End If
+                If isPreloading Then
+                    For Each savedDevice As SavedDevice In My.Settings.SavedDevices
 
+                        If (savedDevice.LocationURL = device.LocationURL) Then                      '// if the inbound device is a match for a saved device
+                            If savedDevice.IsLinkedDevice Then                                      '// we're dealing with the parent of a linked device
+                                If Not disc.isManagedDevice(savedDevice.LocationURL) Then           '// have we already processed it?
+                                    If disc.isAvailableDevice(savedDevice.LinkedLocationURL) Then   '// we have the ingredients, lets make a linked device
+                                        '// make a linked device
+                                        disc.ManagedDevicesAction(device, UPnPDeviceManager.eManagedDevicesAction.addLinkedDevice)
+                                    Else                                                            '// the child hasn't arrived yet...so do nothing right now
+                                        '// do nothing
+                                    End If
+                                Else
+                                    '// do nothing                                                  '// we already processed this device
+                                End If
+                            Else
+                                '// easy case just load it (if it hasn't been loaded before)
+                                disc.ManagedDevicesAction(device, UPnPDeviceManager.eManagedDevicesAction.addDevice)
+                            End If
+                        ElseIf (savedDevice.LinkedLocationURL = device.LocationURL) And savedDevice.IsLinkedDevice Then            '// in this case, it's the linked child..
+                            If disc.isAvailableDevice(savedDevice.LocationURL) Then                 '// is the parent available
+                                If Not disc.isManagedDevice(savedDevice.LocationURL) Then            '// did we make it already?
+                                    Dim parentDevice As UPnPDevice = disc.getAvailableDevice(savedDevice.LocationURL)   '// get the parent
+                                    If parentDevice IsNot Nothing Then
+                                        '// make a linked device
+                                        disc.ManagedDevicesAction(parentDevice, UPnPDeviceManager.eManagedDevicesAction.addLinkedDevice)
+                                    End If
+
+                                Else
+                                    '// do nothing, it's been processed
+                                End If
+                            Else
+                                '// do nothing
+                            End If
+
+                        End If
+                    Next
+                    If disc.ManagedDevices.Count >= My.Settings.SavedDevices.Count Then
+                        isPreloading = False
+                        lblstatus.Text = "All [" & My.Settings.SavedDevices.Count & "] Managed Devices Preloaded"
+                    End If
+
+                End If
+                If lstManagedDevices.DataSource Is Nothing And disc.ManagedDevices.Count > 0 Then
+                    lstManagedDevices.DataSource = disc.ManagedDevices
+                    lstManagedDevices.DisplayMember = "ManagedDeviceName"
+                End If
                 'lstDevices.Items.Add(device)
                 'lstDevices.DisplayMember = "FriendlyName"
 
@@ -210,7 +269,7 @@ Public Class MainForm
 
         If control.Name = lstDevices.Name Then
             Dim device As UPnPDevice = lstDevices.SelectedItem
-            If disc.CheckForService(device, UPnPDeviceManager.NetworkManager.AVTRANSPORT) Then
+            If disc.CheckForService(device, UPnPDeviceManager.NetworkManager.AVTRANSPORT) And (Not disc.isManagedDevice(device.LocationURL)) Then
                 If disc.CheckForService(device, UPnPDeviceManager.NetworkManager.CONTENTDIRECTORY) Then
                     menuItem1 = New ToolStripMenuItem("Add to Managed Devices List [" & control.SelectedItem.FriendlyName & "]", Nothing, AddressOf mOnClick, "AddManagedDevice")
                 Else
@@ -250,7 +309,7 @@ Public Class MainForm
             Case "AddManagedDevice"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
                 disc.ManagedDevicesAction(device, UPnPDeviceManager.eManagedDevicesAction.addDevice)
-                
+
             Case "AddCompoundDevice"
                 Dim device As UPnPDevice = lstDevices.SelectedItem
                 device.IsLinkedDevice = True
