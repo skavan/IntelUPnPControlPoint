@@ -200,6 +200,7 @@ Public Class MainForm
                     If disc.ManagedDevices.Count >= My.Settings.SavedDevices.Count Then
                         isPreloading = False
                         lblstatus.Text = "All [" & My.Settings.SavedDevices.Count & "] Managed Devices Preloaded"
+                        frmController.Init(disc.ManagedDevices)
                     End If
 
                 End If

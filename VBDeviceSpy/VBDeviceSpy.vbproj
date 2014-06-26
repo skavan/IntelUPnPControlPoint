@@ -71,6 +71,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Discovery.vb" />
+    <Compile Include="frmController.Designer.vb">
+      <DependentUpon>frmController.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmController.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmSysInfo.Designer.vb">
       <DependentUpon>frmSysInfo.vb</DependentUpon>
     </Compile>
@@ -101,10 +107,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Player.vb" />
     <Compile Include="SavedSettings.vb" />
     <Compile Include="Settings.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmController.resx">
+      <DependentUpon>frmController.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmSysInfo.resx">
       <DependentUpon>frmSysInfo.vb</DependentUpon>
     </EmbeddedResource>
@@ -136,6 +146,10 @@
     <ProjectReference Include="..\UPnP\UPnP.csproj">
       <Project>{584ed187-8f2a-4b58-a266-85f3f212b092}</Project>
       <Name>UPnP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UPNP_AV\UPnPAV.csproj">
+      <Project>{b2439738-5f46-4e59-95a1-92c3df38696f}</Project>
+      <Name>UPnPAV</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
