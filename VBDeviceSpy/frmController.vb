@@ -12,7 +12,7 @@ Public Class frmController
         Me.ManagedDevices = managedDevices
         cmbFilter.DataSource = Me.ManagedDevices
         cmbFilter.DisplayMember = "ManagedDeviceName"
-        cmbFilter.SelectedIndex = 1
+        cmbFilter.SelectedIndex = 0
         OpenSource.Utilities.EventLogger.Enabled = True
         Me.Show()
     End Sub
@@ -28,7 +28,7 @@ Public Class frmController
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
 
-        player.avTransport.GetPositionInfo(0)
-        Debug.Print(player.avTransport.CurrentTrackMetaData)
+        'player.avTransport.GetPositionInfo(0)
+        'Debug.Print(player.avTransport.CurrentTrackMetaData)
     End Sub
 End Class

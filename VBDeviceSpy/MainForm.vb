@@ -340,6 +340,6 @@ Public Class MainForm
 
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        disc.NetworkScan("http://192.168.1.126:9000/plugins/UPnP/MediaServer.xml", True)
+        frmController.Init(disc.ManagedDevices)
     End Sub
 End Class
