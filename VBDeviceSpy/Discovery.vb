@@ -121,10 +121,13 @@ Namespace UPnPDeviceManager
 
         '// Scan Network for a Specific Device
         Public Sub NetworkScan(deviceDescriptionURL As String, bforceAddDevice As Boolean)
-            If bforceAddDevice Then
-                ForceAddDevice(deviceDescriptionURL)
-            Else
-                NetworkScan(deviceDescriptionURL)
+
+            If deviceDescriptionURL <> "" Then
+                If bforceAddDevice Then
+                    ForceAddDevice(deviceDescriptionURL)
+                Else
+                    NetworkScan(deviceDescriptionURL)
+                End If
             End If
         End Sub
 

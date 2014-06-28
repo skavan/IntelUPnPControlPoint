@@ -71,7 +71,7 @@ Public Class MainForm
 
         Dim myCol As SearchActions = My.Settings.SearchActions
         If myCol Is Nothing Then myCol = New SearchActions
-        Dim mySavedDevices As SavedDevices = My.Settings.SavedDevices
+        Dim mySavedDevices As SavedDevices '= My.Settings.SavedDevices
         If mySavedDevices Is Nothing Then mySavedDevices = New SavedDevices
 
 
@@ -130,13 +130,15 @@ Public Class MainForm
 
         Dim savedDevices As SavedDevices = My.Settings.SavedDevices
         If savedDevices IsNot Nothing Then
-            isPreloading = True
-            For Each savedDevice As SavedDevice In savedDevices
-                If savedDevice.IsLinkedDevice Then
-                    disc.NetworkScan(savedDevice.LinkedLocationURL, True)
-                End If
-                disc.NetworkScan(savedDevice.LocationURL, True)
-            Next
+            If savedDevices.Count > 0 Then
+                isPreloading = True
+                For Each savedDevice As SavedDevice In savedDevices
+                    If savedDevice.IsLinkedDevice Then
+                        disc.NetworkScan(savedDevice.LinkedLocationURL, True)
+                    End If
+                    disc.NetworkScan(savedDevice.LocationURL, True)
+                Next
+            End If
         End If
 
         'cmbFilter.Items.Add(New SearchAction("http://192.168.1.126:9000/plugins/UPnP/MediaRenderer.xml?player=00:04:20:16:8d:51", "SqueezeBox @ 192.168.1.126", SearchAction.eSearchType.deviceIP))

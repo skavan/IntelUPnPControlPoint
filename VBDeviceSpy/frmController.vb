@@ -12,7 +12,11 @@ Public Class frmController
         Me.ManagedDevices = managedDevices
         cmbFilter.DataSource = Me.ManagedDevices
         cmbFilter.DisplayMember = "ManagedDeviceName"
-        cmbFilter.SelectedIndex = 0
+        If cmbFilter.Items.Count > 0 Then
+
+            cmbFilter.SelectedIndex = 0
+        End If
+
         OpenSource.Utilities.EventLogger.Enabled = True
         Me.Show()
     End Sub
@@ -30,5 +34,9 @@ Public Class frmController
 
         'player.avTransport.GetPositionInfo(0)
         'Debug.Print(player.avTransport.CurrentTrackMetaData)
+    End Sub
+
+    Private Sub frmController_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+        player.shutdown()
     End Sub
 End Class
