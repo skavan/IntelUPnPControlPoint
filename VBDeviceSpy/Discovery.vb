@@ -2,6 +2,7 @@
 Imports OpenSource.Utilities
 Imports System.ComponentModel
 Imports System.Threading
+Imports System.Net.NetworkInformation
 
 Namespace UPnPDeviceManager
 
@@ -135,7 +136,13 @@ Namespace UPnPDeviceManager
         Private Sub ForceAddDevice(deviceDescriptionURL As String)
             Try
                 Dim NetworkUri = New Uri(deviceDescriptionURL)
-                Dim df As UPnPDeviceFactory = New UPnPDeviceFactory(NetworkUri, 1800, New UPnPDeviceFactory.UPnPDeviceHandler(AddressOf HandleForceAddDevice), New UPnPDeviceFactory.UPnPDeviceFailedHandler(AddressOf HandleForceAddFailed), Nothing, Nothing)
+                Dim myIP As System.Net.IPAddress = System.Net.Dns.GetHostByName(System.Net.Dns.GetHostName()).AddressList(1)
+                Dim hostname As String = System.Net.Dns.GetHostName
+                'Dim p As New Ping()
+                'Debug.Print(System.Web.HttpContext.Current.Request.UserHostAddress)
+                'Dim r As PingReply = p.Send(hostname & " -4")
+                'If r.Status = IPStatus.Success Then myIP = r.Address
+                Dim df As UPnPDeviceFactory = New UPnPDeviceFactory(NetworkUri, 1800, New UPnPDeviceFactory.UPnPDeviceHandler(AddressOf HandleForceAddDevice), New UPnPDeviceFactory.UPnPDeviceFailedHandler(AddressOf HandleForceAddFailed), myIP, Nothing)
                 'Dim df As UPnPDeviceFactory = New UPnPDeviceFactory(NetworkUri, 1800, New UPnPDeviceFactory.UPnPDeviceHandler(ForceDeviceOKSink), New UPnPDeviceFactory.UPnPDeviceFailedHandler(ForceDeviceFailSink), Nothing, Nothing)
 
             Catch ex_23 As Exception
@@ -367,7 +374,7 @@ Namespace UPnPDeviceManager
             'Next
 
 
-            
+
 
 
         End Sub
